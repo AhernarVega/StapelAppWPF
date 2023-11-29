@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mvm="clr-namespace:StapelAppWPF.ViewModels"
         xmlns:com="clr-namespace:StapelAppWPF.Infrastructure.Commands"
-        xmlns:LiveChart="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:LiveChart2="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:local="clr-namespace:WPF_MVVM_NET"
         mc:Ignorable="d"
         Title="StapelUdpApp"
@@ -20,7 +20,7 @@
 
     <Window.Resources>
         <!-- СТИЛЬ ГРАФИКОВ -->
-        <Style TargetType="LiveChart:CartesianChart">
+        <Style TargetType="LiveChart2:CartesianChart">
             <Setter Property="Margin" Value="20, 10"/>
             <Setter Property="MinHeight" Value="200"/>
         </Style>
@@ -139,18 +139,23 @@
         <!-- ГРАФИКИ -->
         <StackPanel>
             <!-- ГРАФИК ОБОРОТОВ -->
-            <LiveChart:CartesianChart Series="{Binding Path=RpmShowCollection}">
+            <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
+                                       ZoomMode="X">
                 
-            </LiveChart:CartesianChart>
+            </LiveChart2:CartesianChart>
             
             <!-- ГРАФИК КОЛЕБАНИЙ -->
-            <LiveChart:CartesianChart Visibility="{Binding Path=ShowOscilChart}">
+            <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
+                                       ZoomMode="X"
+                                       Visibility="{Binding Path=ShowOscilChart}">
 
-            </LiveChart:CartesianChart>
+            </LiveChart2:CartesianChart>
             <!-- ГРАФИК СПЕКТРАЛЬНОГО АНАЛИЗА -->
-            <LiveChart:CartesianChart Visibility="{Binding Path=ShowHarmChart}">
+            <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
+                                       ZoomMode="X"
+                                       Visibility="{Binding Path=ShowHarmChart}">
 
-            </LiveChart:CartesianChart>
+            </LiveChart2:CartesianChart>
         </StackPanel>
 
     </DockPanel>

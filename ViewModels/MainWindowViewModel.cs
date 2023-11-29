@@ -10,8 +10,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-using LiveCharts;
-using LiveCharts.Wpf;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 
 using ManagedNativeWifi;
 
@@ -85,7 +85,7 @@ namespace StapelAppWPF.ViewModels
             set
             {
                 Set(ref checkOscilChart, value);
-                if(checkOscilChart)
+                if (checkOscilChart)
                 {
                     ShowOscilChart = Visibility.Visible;
                 }
@@ -113,15 +113,9 @@ namespace StapelAppWPF.ViewModels
         }
         #endregion ПЕРЕКЛЮЧЕНИЕ ОТОБРАЖЕНИЯ ГРАФИКОВ
 
-        #region ДЛЯ СКРОЛЛА ГРАФИКА
-
-        #endregion ДЛЯ СКРОЛЛА ГРАФИКА
-
         // Коллекция значений для отображения графика
-        private SeriesCollection rpmShowCollection;
-        public SeriesCollection RpmShowCollection { get => rpmShowCollection; set => Set(ref rpmShowCollection, value); }
-
-
+        private ISeries[] rpmShowCollection;
+        public ISeries[] RpmShowCollection { get => rpmShowCollection; set => Set(ref rpmShowCollection, value); }
 
         #endregion ВИЗУАЛЬНОЕ ОФОРМЛЕНИЕ
 
@@ -214,23 +208,6 @@ namespace StapelAppWPF.ViewModels
         }
         #endregion КОМАНДА ПЕРЕКЛЮЧЕНИЯ ПОДКЛЮЧЕНИЯ
 
-        #region КОМАНДА СКРОЛЛА ГРАФИКА RPM
-
-        ICommand ScrollRpmCmd { get; }
-
-        private void OnScrollRpmCmdExecuted(object param)
-        {
-
-        }
-
-        // Можно опустить, поскольку по умолчанию в Lambda Command строит return true
-        //private bool CanScrollRpmCmdExecute(object param)
-        //{
-        //    return true;
-        //}
-
-        #endregion КОМАНДА СКРОЛЛА ГРАФИКА RPM
-
         #endregion КОМАНДЫ
 
         public MainWindowViewModel()
@@ -243,12 +220,13 @@ namespace StapelAppWPF.ViewModels
             #region ИНИЦИАЛИЗАЦИЯ ПОЛЕЙ ВИЗУАЛЬНОГО ОФОРМЛЕНИЯ
             connectText = "Подключиться";
             connectColor = Brushes.Green;
-            rpmShowCollection = new()
+            connectColor = Brushes.Green;
+            RpmShowCollection = new ISeries[]
             {
-                new LineSeries
+                new LineSeries<double>
                 {
-                    LineSmoothness = 0,
-                    Values = new ChartValues<double>{1,200,300,-100,450,750,-200,30,400,1500,400,300,200,100},
+                    Values = new double[] { 1, 200, 300, -100, 450, 750, -200, 30, 400, 1500, 400, 300, 200, 100 },
+                    Fill = null
                 }
             };
 
