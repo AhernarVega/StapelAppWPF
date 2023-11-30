@@ -12,7 +12,8 @@
         MinWidth="1300"
         Width="1300"
         ShowInTaskbar="True"
-        SizeToContent="Height">
+        SizeToContent="Height"
+        ResizeMode="NoResize">
 
     <Window.DataContext>
         <mvm:MainWindowViewModel/>
@@ -22,7 +23,6 @@
         <!-- СТИЛЬ ГРАФИКОВ -->
         <Style TargetType="LiveChart2:CartesianChart">
             <Setter Property="Margin" Value="20, 10"/>
-            <Setter Property="MinHeight" Value="200"/>
         </Style>
         <!-- СТИЛЬ КНОПОК -->
         <Style TargetType="Button">
@@ -65,11 +65,12 @@
                     Orientation="Horizontal">
             <!-- КНОПКИ УПРАВЛЕНИЯ ДАННЫМИ -->
             <Button Height="50"
-                    Command="{Binding Path=SwitchConnection}"
+                    Command="{Binding Path=SwitchConnectionCmd}"
                     Foreground="{Binding Path=ConnectColor}"
                     Content="{Binding Path=ConnectText}"/>
             <Button Height="50"
-                    Width="120">
+                    Width="120"
+                    Command="{Binding Path=PointAddCmd}">
                 <TextBlock VerticalAlignment="Center"
                            HorizontalAlignment="Center"
                            TextAlignment="Center">Начать <LineBreak/> запись</TextBlock>
@@ -140,20 +141,22 @@
         <StackPanel>
             <!-- ГРАФИК ОБОРОТОВ -->
             <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
-                                       ZoomMode="X">
-                
+                                       ZoomMode="X"
+                                       MinHeight="200"
+                                       XAxes="{Binding Path=XAxes}"
+                                       YAxes="{Binding Path=YAxes}">
             </LiveChart2:CartesianChart>
             
             <!-- ГРАФИК КОЛЕБАНИЙ -->
             <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
                                        ZoomMode="X"
-                                       Visibility="{Binding Path=ShowOscilChart}">
-
-            </LiveChart2:CartesianChart>
+                                       Visibility="{Binding Path=ShowOscilChart}"
+                                       MinHeight="{Binding Path=HeightOscilChart}"/>
             <!-- ГРАФИК СПЕКТРАЛЬНОГО АНАЛИЗА -->
             <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
                                        ZoomMode="X"
-                                       Visibility="{Binding Path=ShowHarmChart}">
+                                       Visibility="{Binding Path=ShowHarmChart}"
+                                       MinHeight="{Binding Path=HeightHarmChart}">
 
             </LiveChart2:CartesianChart>
         </StackPanel>

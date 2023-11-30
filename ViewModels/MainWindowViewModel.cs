@@ -12,12 +12,14 @@ using System.Windows.Media;
 
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting.Effects;
+using LiveChartsCore.SkiaSharpView.Painting;
 
 using ManagedNativeWifi;
 
 using Microsoft.Win32;
 
-using ScottPlot;
+using SkiaSharp;
 
 using StapelAppWPF.Infrastructure.Commands;
 using StapelAppWPF.Models;
@@ -28,6 +30,11 @@ namespace StapelAppWPF.ViewModels
 {
     internal class MainWindowViewModel : BaseViewModel
     {
+        #region DEBUG
+        ObservableCollection<double> ser;
+        Random rand = new();
+        #endregion DEBUG
+
         #region Свойства
 
         // !!! СВОЙСТВО ГЛАВНОЙ МОДЕЛИ !!! //
@@ -68,13 +75,15 @@ namespace StapelAppWPF.ViewModels
         #endregion КНОПКА ПОДКЛЮЧЕНИЯ
 
         #region ПЕРЕКЛЮЧЕНИЕ ОТОБРАЖЕНИЯ ГРАФИКОВ
+        #region VISIBILITY
         // Отображение различных графиков
         private Visibility showOscilChart;
         private Visibility showHarmChart;
 
         public Visibility ShowOscilChart { get => showOscilChart; set => Set(ref showOscilChart, value); }
         public Visibility ShowHarmChart { get => showHarmChart; set => Set(ref showHarmChart, value); }
-
+        #endregion VISIBILITY
+        #region checkBoxes ОТОБРАЖЕНИЯ ГРАФИКОВ
         // Для checkBox - ов
         private bool checkOscilChart;
         private bool checkHarmChart;
@@ -87,6 +96,8 @@ namespace StapelAppWPF.ViewModels
                 Set(ref checkOscilChart, value);
                 if (checkOscilChart)
                 {
+                    if (showOscilChart == Visibility.Hidden)
+                        HeightOscilChart = 300;
                     ShowOscilChart = Visibility.Visible;
                 }
                 else if (!checkOscilChart)
@@ -103,6 +114,8 @@ namespace StapelAppWPF.ViewModels
                 Set(ref checkHarmChart, value);
                 if (checkHarmChart)
                 {
+                    if (showHarmChart == Visibility.Hidden)
+                        HeightHarmChart = 300;
                     ShowHarmChart = Visibility.Visible;
                 }
                 else if (!checkHarmChart)
@@ -111,6 +124,19 @@ namespace StapelAppWPF.ViewModels
                 }
             }
         }
+        #endregion checkBoxes ОТОБРАЖЕНИЯ ГРАФИКОВ
+        #region ВЫСОТЫ ГРАФИКОВ ДЛЯ ПОЯВЛЕНИЯ/СКРЫТИЯ
+        // Высоты графиков для их скрытия
+        private int heightOscilChart;
+        private int heightHarmChart;
+
+        public int HeightOscilChart { get => heightOscilChart; set => Set(ref heightOscilChart, value); }
+        public int HeightHarmChart { get => heightHarmChart; set => Set(ref heightHarmChart, value); }
+        #endregion ВЫСОТЫ ГРАФИКОВ ДЛЯ ПОЯВЛЕНИЯ/СКРЫТИЯ
+        #region ОТОБРАЖЕНИЕ РАЗДЕЛИТЕЛЕЙ
+        public Axis[] XAxes { get; set; }
+        public Axis[] YAxes { get; set; }
+        #endregion ОТОБРАЖЕНИЕ РАЗДЕЛИТЕЛЕЙ
         #endregion ПЕРЕКЛЮЧЕНИЕ ОТОБРАЖЕНИЯ ГРАФИКОВ
 
         // Коллекция значений для отображения графика
@@ -156,6 +182,20 @@ namespace StapelAppWPF.ViewModels
 
         #region КОМАНДЫ
 
+        #region DEBUG
+        #region (ДЕБАГ) ДОБАВЛЕНИЕ ТОЧКИ ЧАРТУ
+
+        public ICommand PointAddCmd { get; }
+
+        private void OnPointAddCmdExecuted(object param)
+        {
+            ser.Remove(ser.First());
+            ser.Add(rand.Next(-100, 100));
+        }
+        #endregion (ДЕБАГ) ДОБАВЛЕНИЕ ТОЧКИ ЧАРТУ
+
+        #endregion DEBUG 
+
         #region КОМАНДА ПЕРЕКЛЮЧЕНИЯ ПОДКЛЮЧЕНИЯ
         public ICommand SwitchConnectionCmd { get; }
 
@@ -179,9 +219,6 @@ namespace StapelAppWPF.ViewModels
 
         private bool CanSwitchConnectionCmdExecute(object param)
         {
-            //try
-            //{
-            // Проверка наличия WiFi
             bool checkWifi = false;
 
             foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
@@ -201,37 +238,76 @@ namespace StapelAppWPF.ViewModels
                     }
                 }
             }
-            //}
-            //catch (Exception) { }
+
             ConnectColor = Brushes.DarkGray;
             return false;
         }
         #endregion КОМАНДА ПЕРЕКЛЮЧЕНИЯ ПОДКЛЮЧЕНИЯ
 
+
+
         #endregion КОМАНДЫ
 
         public MainWindowViewModel()
         {
+            #region DEBUG
+            ser = new();
+
+            for (int i = 0; i < 50; i++)
+            {
+                ser.Add(rand.Next(-100, 100));
+            }
+
+            rpmShowCollection = new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Values = ser,
+                    Fill = null,
+                }
+            };
+            #endregion DEBUG
+
             #region ИНИЦИАЛИЗАЦИЯ ПОЛЕЙ 
             #region ИНИЦИАЛИЗАЦИЯ ГЛАВНОЙ МОДЕЛИ
             mainModel = new();
             #endregion ИНИЦИАЛИЗАЦИЯ ГЛАВНОЙ МОДЕЛИ
 
             #region ИНИЦИАЛИЗАЦИЯ ПОЛЕЙ ВИЗУАЛЬНОГО ОФОРМЛЕНИЯ
+            #region КНОПКА ПОДКЛЮЧЕНИЯ
             connectText = "Подключиться";
             connectColor = Brushes.Green;
             connectColor = Brushes.Green;
-            RpmShowCollection = new ISeries[]
+            #endregion КНОПКА ПОДКЛЮЧЕНИЯ
+            #region ВИЗАУЛЬНАЯ ЧАСТЬ ГРАФИКОВ
+            showOscilChart = Visibility.Hidden;
+            showHarmChart = Visibility.Hidden;
+
+            heightOscilChart = 0;
+            heightHarmChart = 0;
+
+            XAxes = new Axis[]
             {
-                new LineSeries<double>
+                new Axis
                 {
-                    Values = new double[] { 1, 200, 300, -100, 450, 750, -200, 30, 400, 1500, 400, 300, 200, 100 },
-                    Fill = null
+                    SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray) { StrokeThickness = 2 }
                 }
             };
 
-            showOscilChart = Visibility.Collapsed;
-            showHarmChart = Visibility.Collapsed;
+            YAxes = new Axis[]
+                {
+                new Axis
+                {
+                    TextSize = 10,
+                    SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray)
+                    {
+                        StrokeThickness = 2,
+                        PathEffect = new DashEffect(new float[] { 3, 3 })
+                    }
+                }
+                };
+            #endregion ВИЗАУЛЬНАЯ ЧАСТЬ ГРАФИКОВ
+
             #endregion ИНИЦИАЛИЗАЦИЯ ПОЛЕЙ ВИЗУАЛЬНОГО ОФОРМЛЕНИЯ
 
             // Инициализация списка отображаемых данных 
@@ -246,6 +322,7 @@ namespace StapelAppWPF.ViewModels
 
             #region ИНИЦИАЛИЗАЦИЯ КОМАНД
             SwitchConnectionCmd = new LambdaCommand(OnSwitchConnectionCmdExecuted, CanSwitchConnectionCmdExecute);
+            PointAddCmd = new LambdaCommand(OnPointAddCmdExecuted);
             #endregion ИНИЦИАЛИЗАЦИЯ КОМАНД
         }
     }
