@@ -72,13 +72,15 @@ namespace StapelAppWPF.Models
         #region ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
         // Объект-заглушка для синхронизации потоков
         private object locker;
+        // Номер последнего пришедшего пакета
+        private int lastMesNumber;
         // Для хранения данных
         private List<int> storageCollection;
         #endregion ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
         #region ВНЕШНИ ПОЛЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ
         // Для отображения данных
         ObservableCollection<int> showCollection { get; set; }
-        #endregion
+        #endregion ВНЕШНИ ПОЛЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ
         #endregion ПОЛЯ - ВНЕШНИЙ РЕГИОН
 
         // Установить соединение
@@ -96,21 +98,34 @@ namespace StapelAppWPF.Models
         {
             // Создание объекта для работы с Udp
             using UdpClient receiver = new(port);
+            // Переменная, для сохранения значения колебаний
+            int value = 0;
+            // Переменная для сохранения времени, прошедшего без оборотов
+            int noRpmTime = 0;
             // Цикл прослушки сообщений
             while (true)
             {
                 try
                 {
-                    // Получение данных
-                    var result = await receiver.ReceiveAsync();
-                    // Получение данных в строку
-                    byte[] message = result.Buffer;
-                    // Парсинг данных
-                    // Блокировка данных на время использования
-                    lock (locker)
+                    // Получение данных в виде массива byte
+                    byte[] message = (await receiver.ReceiveAsync()).Buffer;
+                    // Если данные действительно пришли
+                    if (message.Length > 0)
                     {
-                        // Сохранение данных в массивы
+                        // Парсинг данных
+                        int mesLen = message.Length;
+                        // Временная переменная номера пакета
+                        // Получение номера пакета
+                        int mesNumber = (message[mesLen - 5] << 8) | message[mesLen - 4];
+                        // Отбрасываем все устаревшие пакеты
+                        if(mesNumber > lastMesNumber)
+                        {// Блокировка данных на время использования
+                            lock (locker)
+                            {
+                                // Сохранение данных в массивы
 
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -141,9 +156,10 @@ namespace StapelAppWPF.Models
             port = 4210;
 
             locker = new();
-            showCollection = new();
+            lastMesNumber= 0;
             storageCollection = new();
 
+            showCollection = new();
         }
     }
 }

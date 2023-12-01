@@ -30,9 +30,27 @@ namespace StapelAppWPF.ViewModels
 {
     internal class MainWindowViewModel : ImplementedINPC
     {
+        #region КОД АА
+        #region Для отображения данных
+        // Массив отображаемых данных
+        private ObservableCollection<Unit> show;
+        // Макисмальное количество данных, отображаемых на графике
+        private readonly int lengthShow;
+        // Макисмальное количество данных, отображаемых на графике спектрального анализа
+        private readonly int spectrumAnalisisCount;
+        // Изменение масштаба графика (нужно вынести во viewModel)
+        private int lengthShowSpectrumAnalisisCount;
+        public int LengthShowSpectrumAnalisisCount
+        {
+            get => lengthShowSpectrumAnalisisCount;
+            set => Set(ref lengthShowSpectrumAnalisisCount, Convert.ToInt32(value));
+        }
+        #endregion
+        #endregion
+
         #region DEBUG
-        ObservableCollection<double> ser;
-        Random rand = new();
+        //ObservableCollection<double> ser;
+        //Random rand = new();
         #endregion DEBUG
 
         #region Свойства
@@ -145,21 +163,7 @@ namespace StapelAppWPF.ViewModels
 
         #endregion ВИЗУАЛЬНОЕ ОФОРМЛЕНИЕ
 
-        #region Для отображения данных
-        // Массив отображаемых данных
-        private ObservableCollection<Unit> show;
-        // Макисмальное количество данных, отображаемых на графике
-        private readonly int lengthShow;
-        // Макисмальное количество данных, отображаемых на графике спектрального анализа
-        private readonly int spectrumAnalisisCount;
-        // Изменение масштаба графика (нужно вынести во viewModel)
-        private int lengthShowSpectrumAnalisisCount;
-        public int LengthShowSpectrumAnalisisCount
-        {
-            get => lengthShowSpectrumAnalisisCount;
-            set => Set(ref lengthShowSpectrumAnalisisCount, Convert.ToInt32(value));
-        }
-        #endregion
+
 
 
         // Диаграмма спектрального анализа
@@ -189,8 +193,8 @@ namespace StapelAppWPF.ViewModels
 
         private void OnPointAddCmdExecuted(object param)
         {
-            ser.Remove(ser.First());
-            ser.Add(rand.Next(-100, 100));
+            //ser.Remove(ser.First());
+            //ser.Add(rand.Next(-100, 100));
         }
         #endregion (ДЕБАГ) ДОБАВЛЕНИЕ ТОЧКИ ЧАРТУ
 
