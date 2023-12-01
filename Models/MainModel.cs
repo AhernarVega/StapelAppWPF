@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -57,19 +59,48 @@ namespace StapelAppWPF.Models
 
         #endregion ПЕРЕНЕСЕННЫЙ КОД АА
 
-        #region ПОЛЯ
+        #region ПОЛЯ - ВНЕШНИЙ РЕГИОН
         #region ДЛЯ РАБОТЫ С UDP
         // IP адрес удаленного устройства
-        private readonly string remoteIP = ""; 
-        // Поле для работы с передачей данных по UDP
-        UdpClient udp;
+        private readonly string remoteIP;
+        // Порт для удаленного соединения
+        private readonly int port;
         #endregion ДЛЯ РАБОТЫ С UDP
-        #endregion ПОЛЯ
+
+        #region ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
+        // Для отображения данных
+        ObservableCollection<int> showCollection;
+        // Для хранения данных
+        List<int> storageCollection;
+        #endregion ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
+        #endregion ПОЛЯ - ВНЕШНИЙ РЕГИОН
 
         // Установить соединение
         void SetConnect()
         {
+            // Создание объекта для работы с Udp
+            using UdpClient sender = new(new IPEndPoint(IPAddress.Parse(remoteIP), port));
+            // Преобразование сообщение в массив байт
+            byte[] data = Encoding.ASCII.GetBytes("*");
+            // Отправка сообщения для устанговки соединения
+            sender.Send(data);
+        }
 
+        async void ProcessingPackage()
+        {
+            // Создание объекта для работы с Udp
+            using UdpClient receiver = new(port);
+            // Цикл прослушки сообщений
+            while (true)
+            {
+                // Получение данных
+                var result = await receiver.ReceiveAsync();
+                // Получение данных в строку
+                byte[] message = result.Buffer;
+                // Блокировка данных на время использования
+
+
+            }
         }
 
         void SetDisconnect()
@@ -89,9 +120,11 @@ namespace StapelAppWPF.Models
 
         public MainModel()
         {
-            // Инициализация поля для работы с UDP
-            udp = new();
+            remoteIP = "192.168.4.22";
+            port = 4210;
 
+            showCollection = new();
+            storageCollection = new();
 
         }
     }
