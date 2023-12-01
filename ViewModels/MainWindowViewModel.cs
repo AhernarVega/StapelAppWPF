@@ -28,7 +28,7 @@ using StapelAppWPF.ViewModels.Base;
 
 namespace StapelAppWPF.ViewModels
 {
-    internal class MainWindowViewModel : BaseViewModel
+    internal class MainWindowViewModel : ImplementedINPC
     {
         #region DEBUG
         ObservableCollection<double> ser;

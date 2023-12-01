@@ -11,9 +11,11 @@ using System.Windows;
 
 using Microsoft.Win32;
 
+using StapelAppWPF.ViewModels.Base;
+
 namespace StapelAppWPF.Models
 {
-    class MainModel
+    class MainModel : ImplementedINPC
     {
         #region ПЕРЕНЕСЕННЫЙ КОД АА
 
@@ -68,11 +70,15 @@ namespace StapelAppWPF.Models
         #endregion ДЛЯ РАБОТЫ С UDP
 
         #region ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
-        // Для отображения данных
-        ObservableCollection<int> showCollection;
+        // Объект-заглушка для синхронизации потоков
+        private object locker;
         // Для хранения данных
-        List<int> storageCollection;
+        private List<int> storageCollection;
         #endregion ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
+        #region ВНЕШНИ ПОЛЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ
+        // Для отображения данных
+        ObservableCollection<int> showCollection { get; set; }
+        #endregion
         #endregion ПОЛЯ - ВНЕШНИЙ РЕГИОН
 
         // Установить соединение
@@ -93,13 +99,24 @@ namespace StapelAppWPF.Models
             // Цикл прослушки сообщений
             while (true)
             {
-                // Получение данных
-                var result = await receiver.ReceiveAsync();
-                // Получение данных в строку
-                byte[] message = result.Buffer;
-                // Блокировка данных на время использования
+                try
+                {
+                    // Получение данных
+                    var result = await receiver.ReceiveAsync();
+                    // Получение данных в строку
+                    byte[] message = result.Buffer;
+                    // Парсинг данных
+                    // Блокировка данных на время использования
+                    lock (locker)
+                    {
+                        // Сохранение данных в массивы
 
-
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
         }
 
@@ -123,6 +140,7 @@ namespace StapelAppWPF.Models
             remoteIP = "192.168.4.22";
             port = 4210;
 
+            locker = new();
             showCollection = new();
             storageCollection = new();
 

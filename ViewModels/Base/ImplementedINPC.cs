@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace StapelAppWPF.ViewModels.Base
 {
-    internal abstract class BaseViewModel : INotifyPropertyChanged
+    internal abstract class ImplementedINPC : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
