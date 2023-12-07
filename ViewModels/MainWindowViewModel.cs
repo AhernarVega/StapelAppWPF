@@ -76,6 +76,9 @@ namespace StapelAppWPF.ViewModels
         #endregion КНОПКА ПОДКЛЮЧЕНИЯ
 
         #region ПЕРЕКЛЮЧЕНИЕ ОТОБРАЖЕНИЯ ГРАФИКОВ
+        private readonly int smallHeight = 200;
+        private readonly int middleHeight = 300;
+        private readonly int largeHeight = 400;
         #region VISIBILITY
         // Отображение различных графиков
         private Visibility showRpmChart;
@@ -98,7 +101,7 @@ namespace StapelAppWPF.ViewModels
                 if (checkRpmChart)
                 {
                     if (showRpmChart == Visibility.Hidden)
-                        HeightRpmChart = 300;
+                        HeightRpmChart = middleHeight;
                     ShowRpmChart = Visibility.Visible;
                 }
                 else if (!checkRpmChart)
@@ -116,7 +119,7 @@ namespace StapelAppWPF.ViewModels
                 if (checkHarmChart)
                 {
                     if (showHarmChart == Visibility.Hidden)
-                        HeightHarmChart = 300;
+                        HeightHarmChart = middleHeight;
                     ShowHarmChart = Visibility.Visible;
                 }
                 else if (!checkHarmChart)
@@ -153,11 +156,6 @@ namespace StapelAppWPF.ViewModels
 
         // Диаграмма спектрального анализа
         public ObservableCollection<int>? spectrum;
-
-        // Высоты графиков
-        private static int height1 = 150;   // Высота 1 графика Динамическая
-        private static int height2 = 100;   // Высота 2 графика
-        private static int height3 = 200;   // Высота 3 графика
 
         private static int NUM_READ = 5;  // порядок медианы
         private static int[] buffer = new int[5];  // статический буфер
@@ -197,16 +195,19 @@ namespace StapelAppWPF.ViewModels
                 {
                     ConnectColor = Brushes.Orange;
                     ConnectText = "Отключиться";
+                    mainModel.ReceiveData = true;
                 }
                 else if (connectText == "Отключиться")
                 {
                     ConnectColor = Brushes.Green;
                     ConnectText = "Подключиться";
+                    mainModel.ReceiveData = false;
                 }
                 else
                 {
                     ConnectColor = Brushes.Red;
                     ConnectText = "ОШИБКА";
+                    mainModel.ReceiveData = false;
                 }
                 return;
             }
@@ -239,7 +240,11 @@ namespace StapelAppWPF.ViewModels
                 {
                     if (connectionName.ProfileName == "Torsiograph_V1.4")
                     {
-                        return true;
+                        if (connectText == "ОШИБКА")
+                            ConnectText = "Подключиться";
+                        if (connectText == "Подключиться")
+                            ConnectColor = Brushes.Green;
+                            return true;
                     }
                 }
             }
@@ -288,6 +293,7 @@ namespace StapelAppWPF.ViewModels
             showRpmChart = Visibility.Hidden;
             showHarmChart = Visibility.Hidden;
 
+            heightRpmOscilChart = largeHeight;
             heightRpmChart = 0;
             heightHarmChart = 0;
 

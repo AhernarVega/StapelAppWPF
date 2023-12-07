@@ -79,6 +79,8 @@ namespace StapelAppWPF.Models
         private int lastMesNumber;
         // Для хранения данных
         private List<Unit> storageCollection;
+        // Поток обработки данных
+        Thread receiveThread;
         #endregion ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
         #endregion ПОЛЯ - ВНЕШНИЙ РЕГИОН
 
@@ -105,16 +107,22 @@ namespace StapelAppWPF.Models
         #endregion
 
         // Установить соединение
-        void SetConnect()
+        private void SendInfoForController()
         {
-            // Создание объекта для работы с Udp
-            using UdpClient sender = new(new IPEndPoint(IPAddress.Parse(remoteIP), port));
-            // Преобразование сообщение в массив байт
-            byte[] data = Encoding.ASCII.GetBytes("*");
-            // Отправка сообщения для устанговки соединения
-            sender.Send(data);
-
-
+            try
+            {
+                // Создание объекта для работы с Udp
+                using UdpClient sender = new(remoteIP, port);
+                // Преобразование сообщение в массив байт
+                byte[] data = Encoding.ASCII.GetBytes("*");
+                // Отправка сообщения для устанговки соединения
+                sender.Send(data);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Неудалось отправить сообщение контроллеру");
+                MessageBox.Show(ex.Message);
+            }
         }
 
         async void ProcessingPackage()
@@ -126,10 +134,8 @@ namespace StapelAppWPF.Models
             // Переменная для сохранения времени, прошедшего без оборотов
             int noRpmTime = 0;
             // Цикл прослушки сообщений
-            while (true)
+            while (receiveData)
             {
-                if (receiveData)
-                {
                     try
                     {
                         // Получение данных в виде массива byte
@@ -221,11 +227,22 @@ namespace StapelAppWPF.Models
                     {
                         MessageBox.Show(ex.Message);
                     }
-                }
             }
         }
 
-        void SetDisconnect()
+        public void StartReceiveThread()
+        {
+            receiveData = true;
+            receiveThread.Start();
+        }
+
+        public void StopReceiveThread()
+        {
+            receiveData = false;
+            receiveThread.Join();
+        }
+
+        public void SetDisconnect()
         {
 
         }
@@ -240,6 +257,12 @@ namespace StapelAppWPF.Models
             storageCollection = new();
 
             showCollection = new();
+
+            SendInfoForController();
+            receiveThread = new(new ThreadStart(ProcessingPackage))
+            {
+                IsBackground = true
+            };
         }
     }
 }

@@ -97,7 +97,7 @@
                             Grid.Column="0"
                             Orientation="Horizontal">
                     <CheckBox VerticalAlignment="Center"
-                              IsChecked="{Binding Path=CheckOscilChart}"></CheckBox>
+                              IsChecked="{Binding Path=CheckRpmChart}"></CheckBox>
                     <Label>Разделение</Label>
                 </StackPanel>
 
@@ -142,7 +142,8 @@
             <!-- ГРАФИК ОБОРОТОВ -->
             <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
                                        ZoomMode="X"
-                                       MinHeight="200"
+                                       Height="{Binding Path=HeightRpmOscilChart}"
+                                       MinHeight="{Binding Path=HeightRpmOscilChart}"
                                        XAxes="{Binding Path=XAxes}"
                                        YAxes="{Binding Path=YAxes}">
             </LiveChart2:CartesianChart>
@@ -150,12 +151,14 @@
             <!-- ГРАФИК КОЛЕБАНИЙ -->
             <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
                                        ZoomMode="X"
-                                       Visibility="{Binding Path=ShowOscilChart}"
-                                       MinHeight="{Binding Path=HeightOscilChart}"/>
+                                       Visibility="{Binding Path=ShowRpmChart}"
+                                       Height="{Binding Path=HeightRpmChart}"
+                                       MinHeight="{Binding Path=HeightRpmChart}"/>
             <!-- ГРАФИК СПЕКТРАЛЬНОГО АНАЛИЗА -->
             <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
                                        ZoomMode="X"
                                        Visibility="{Binding Path=ShowHarmChart}"
+                                       Height="{Binding Path=HeightHarmChart}"
                                        MinHeight="{Binding Path=HeightHarmChart}">
 
             </LiveChart2:CartesianChart>
