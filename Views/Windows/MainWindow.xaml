@@ -66,7 +66,7 @@
             <!-- КНОПКИ УПРАВЛЕНИЯ ДАННЫМИ -->
             <Button Height="50"
                     Command="{Binding Path=SwitchConnectionCmd}"
-                    Foreground="{Binding Path=ConnectColor}"
+                    Foreground="{Binding Path=ConnectColor, UpdateSourceTrigger=PropertyChanged}"
                     Content="{Binding Path=ConnectText}"/>
             <Button Height="50"
                     Width="120"

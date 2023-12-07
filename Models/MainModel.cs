@@ -61,6 +61,7 @@ namespace StapelAppWPF.Models
 
         #endregion ПЕРЕНЕСЕННЫЙ КОД АА
 
+
         #region ПОЛЯ - ВНЕШНИЙ РЕГИОН
         #region ДЛЯ РАБОТЫ С UDP
         // IP адрес удаленного устройства
@@ -69,19 +70,39 @@ namespace StapelAppWPF.Models
         private readonly int port;
         #endregion ДЛЯ РАБОТЫ С UDP
 
+        // Максимальное количество данных для отображения
+        private readonly int maxCountForShow;
         #region ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
         // Объект-заглушка для синхронизации потоков
-        private object locker;
+        private readonly object locker;
         // Номер последнего пришедшего пакета
         private int lastMesNumber;
         // Для хранения данных
-        private List<int> storageCollection;
+        private List<Unit> storageCollection;
         #endregion ПОЛЯ ДЛЯ РАБОТЫ С ДАННЫМИ
-        #region ВНЕШНИ ПОЛЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ
-        // Для отображения данных
-        ObservableCollection<int> showCollection { get; set; }
-        #endregion ВНЕШНИ ПОЛЯ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ
         #endregion ПОЛЯ - ВНЕШНИЙ РЕГИОН
+
+        #region СВОЙСТВА
+        // Флаг приема данных
+        private bool receiveData;
+        public bool ReceiveData { get => receiveData; set => Set(ref receiveData, value); }
+        // Флаг фильтрации медианным методом
+        private bool median;
+        public bool Median { get => median; set => Set(ref median, value); }
+        // Флаг линейного сглаживания
+        private bool linear;
+        public bool Linear { get => linear; set => Set(ref linear, value); }
+        // Количество оборотов
+        private int rpm;
+        public int Rpm { get => rpm; set => Set(ref rpm, value); }
+        // Включение записи в файл
+        private bool writeDataInFile;
+        public bool WriteDataInFile { get => writeDataInFile; set => Set(ref writeDataInFile, value); }
+        // Для отображения данных
+        public ObservableCollection<Unit> showCollection { get; set; }
+        // Для диаграммы спектрального анализа
+        public ObservableCollection<int> showSpectrum { get; set; }
+        #endregion
 
         // Установить соединение
         void SetConnect()
@@ -92,6 +113,8 @@ namespace StapelAppWPF.Models
             byte[] data = Encoding.ASCII.GetBytes("*");
             // Отправка сообщения для устанговки соединения
             sender.Send(data);
+
+
         }
 
         async void ProcessingPackage()
@@ -105,32 +128,99 @@ namespace StapelAppWPF.Models
             // Цикл прослушки сообщений
             while (true)
             {
-                try
+                if (receiveData)
                 {
-                    // Получение данных в виде массива byte
-                    byte[] message = (await receiver.ReceiveAsync()).Buffer;
-                    // Если данные действительно пришли
-                    if (message.Length > 0)
+                    try
                     {
-                        // Парсинг данных
-                        int mesLen = message.Length;
-                        // Временная переменная номера пакета
-                        // Получение номера пакета
-                        int mesNumber = (message[mesLen - 5] << 8) | message[mesLen - 4];
-                        // Отбрасываем все устаревшие пакеты
-                        if(mesNumber > lastMesNumber)
-                        {// Блокировка данных на время использования
-                            lock (locker)
+                        // Получение данных в виде массива byte
+                        byte[] message = (await receiver.ReceiveAsync()).Buffer;
+                        // Если данные действительно пришли
+                        if (message.Length > 0)
+                        {
+                            // Парсинг данных
+                            int mesLen = message.Length;
+                            // Временная переменная номера пакета
+                            // Получение номера пакета
+                            int mesNumber = (message[mesLen - 5] << 8) | message[mesLen - 4];
+                            // Отбрасываем все повторяющиеся пакеты
+                            if (mesNumber != lastMesNumber)
                             {
-                                // Сохранение данных в массивы
+                                // Запоминаем номер последнего пакета
+                                lastMesNumber = mesNumber;
+                                // Сохраняем количество оборотов
+                                if (message[mesLen - 1] != 0)
+                                {
+                                    Rpm = 60000 / ((message[mesLen - 3] << 8) | message[mesLen - 2]);
+                                    noRpmTime = 0;
+                                }
+                                else
+                                {
+                                    // Засекание времени без оборотов
+                                    noRpmTime += ((message[mesLen - 3] << 8) | message[mesLen - 2]);
+                                    // Если спустя 3.5 сек нет сигнала - нет оборотов
+                                    if (noRpmTime > 3500)
+                                    {
+                                        rpm = 0;
+                                        noRpmTime = 0;
+                                    }
+                                }
 
+
+                                for (int i = 0; i < mesLen / 2 - 3; i++)
+                                {
+                                    // Получаем значение колебаний
+                                    value = (message[i * 2] << 8) | message[i * 2 + 1];
+                                    // 512 - для ототбражения направления колебаний в + или -
+                                    int curValue = (value & 0b0111111111111111) - 512;
+
+                                    // Блокировка данных на время использования
+                                    lock (locker)
+                                    {
+                                        // Данные для отображения на графике
+                                        // Обработка данных
+                                        if (showCollection.Count > 10)
+                                        {
+                                            // Если количество данных для отображения больше 10 использовать сглаживание
+
+                                            // Если включена фильтрация медианным методом
+                                            if (median)
+                                            {
+                                                //
+                                                // TODO: Вызвать метдо медианной фильтрации
+                                                //
+                                            }
+
+                                            // Если установлен влаг линейного сглаживания
+                                            if (linear)
+                                            {
+                                                curValue += showCollection[showCollection.Count - 1].Value + showCollection[showCollection.Count - 2].Value + showCollection[showCollection.Count - 3].Value;
+                                                curValue /= 4;
+                                            }
+                                        }
+
+                                        // Добавление данных для отображения
+                                        showCollection.Add(new Unit
+                                        {
+                                            Sing = 1024 * (value >> 15),
+                                            Value = curValue,
+                                        });
+
+                                        // Если превышено ограничение на отображение, удалять первые значения
+                                        if (showCollection.Count > maxCountForShow)
+                                            showCollection.Remove(showCollection.First());
+                                    }
+                                    // Если включена запись файла
+                                    if (writeDataInFile)
+                                        storageCollection.Add(showCollection[showCollection.Count - 1]);
+                                    Thread.Yield();
+                                }
                             }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
                 }
             }
         }
@@ -140,23 +230,13 @@ namespace StapelAppWPF.Models
 
         }
 
-        // Начать прием пакетов
-        void ReceiveMessage()
-        {
-
-        }
-
-        void SendMessage()
-        {
-        }
-
         public MainModel()
         {
             remoteIP = "192.168.4.22";
             port = 4210;
 
             locker = new();
-            lastMesNumber= 0;
+            lastMesNumber = 0;
             storageCollection = new();
 
             showCollection = new();

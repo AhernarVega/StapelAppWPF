@@ -32,19 +32,19 @@ namespace StapelAppWPF.ViewModels
     {
         #region КОД АА
         #region Для отображения данных
-        // Массив отображаемых данных
-        private ObservableCollection<Unit> show;
-        // Макисмальное количество данных, отображаемых на графике
-        private readonly int lengthShow;
-        // Макисмальное количество данных, отображаемых на графике спектрального анализа
-        private readonly int spectrumAnalisisCount;
-        // Изменение масштаба графика (нужно вынести во viewModel)
-        private int lengthShowSpectrumAnalisisCount;
-        public int LengthShowSpectrumAnalisisCount
-        {
-            get => lengthShowSpectrumAnalisisCount;
-            set => Set(ref lengthShowSpectrumAnalisisCount, Convert.ToInt32(value));
-        }
+        //// Массив отображаемых данных
+        //private ObservableCollection<Unit> show;
+        //// Макисмальное количество данных, отображаемых на графике
+        //private readonly int lengthShow;
+        //// Макисмальное количество данных, отображаемых на графике спектрального анализа
+        //private readonly int spectrumAnalisisCount;
+        //// Изменение масштаба графика (нужно вынести во viewModel)
+        //private int lengthShowSpectrumAnalisisCount;
+        //public int LengthShowSpectrumAnalisisCount
+        //{
+        //    get => lengthShowSpectrumAnalisisCount;
+        //    set => Set(ref lengthShowSpectrumAnalisisCount, Convert.ToInt32(value));
+        //}
         #endregion
         #endregion
 
@@ -71,56 +71,39 @@ namespace StapelAppWPF.ViewModels
         public string ConnectText
         {
             get => connectText;
-            set
-            {
-                if (connectText == "Подключиться")
-                {
-                    ConnectColor = Brushes.Orange;
-                    Set(ref connectText, "Отключиться");
-                }
-                else if (connectText == "Отключиться")
-                {
-                    ConnectColor = Brushes.Green;
-                    Set(ref connectText, "Подключиться");
-                }
-                else
-                {
-                    ConnectColor = Brushes.Red;
-                    Set(ref connectText, "ОШИБКА");
-                }
-            }
+            set => Set(ref connectText, value);
         }
         #endregion КНОПКА ПОДКЛЮЧЕНИЯ
 
         #region ПЕРЕКЛЮЧЕНИЕ ОТОБРАЖЕНИЯ ГРАФИКОВ
         #region VISIBILITY
         // Отображение различных графиков
-        private Visibility showOscilChart;
+        private Visibility showRpmChart;
         private Visibility showHarmChart;
 
-        public Visibility ShowOscilChart { get => showOscilChart; set => Set(ref showOscilChart, value); }
+        public Visibility ShowRpmChart { get => showRpmChart; set => Set(ref showRpmChart, value); }
         public Visibility ShowHarmChart { get => showHarmChart; set => Set(ref showHarmChart, value); }
         #endregion VISIBILITY
         #region checkBoxes ОТОБРАЖЕНИЯ ГРАФИКОВ
         // Для checkBox - ов
-        private bool checkOscilChart;
+        private bool checkRpmChart;
         private bool checkHarmChart;
 
-        public bool CheckOscilChart
+        public bool CheckRpmChart
         {
-            get => checkOscilChart;
+            get => checkRpmChart;
             set
             {
-                Set(ref checkOscilChart, value);
-                if (checkOscilChart)
+                Set(ref checkRpmChart, value);
+                if (checkRpmChart)
                 {
-                    if (showOscilChart == Visibility.Hidden)
-                        HeightOscilChart = 300;
-                    ShowOscilChart = Visibility.Visible;
+                    if (showRpmChart == Visibility.Hidden)
+                        HeightRpmChart = 300;
+                    ShowRpmChart = Visibility.Visible;
                 }
-                else if (!checkOscilChart)
+                else if (!checkRpmChart)
                 {
-                    ShowOscilChart = Visibility.Collapsed;
+                    ShowRpmChart = Visibility.Collapsed;
                 }
             }
         }
@@ -145,10 +128,12 @@ namespace StapelAppWPF.ViewModels
         #endregion checkBoxes ОТОБРАЖЕНИЯ ГРАФИКОВ
         #region ВЫСОТЫ ГРАФИКОВ ДЛЯ ПОЯВЛЕНИЯ/СКРЫТИЯ
         // Высоты графиков для их скрытия
-        private int heightOscilChart;
+        private int heightRpmOscilChart;
+        private int heightRpmChart;
         private int heightHarmChart;
 
-        public int HeightOscilChart { get => heightOscilChart; set => Set(ref heightOscilChart, value); }
+        public int HeightRpmOscilChart { get => heightRpmOscilChart; set => Set(ref heightRpmOscilChart, value); }
+        public int HeightRpmChart { get => heightRpmChart; set => Set(ref heightRpmChart, value); }
         public int HeightHarmChart { get => heightHarmChart; set => Set(ref heightHarmChart, value); }
         #endregion ВЫСОТЫ ГРАФИКОВ ДЛЯ ПОЯВЛЕНИЯ/СКРЫТИЯ
         #region ОТОБРАЖЕНИЕ РАЗДЕЛИТЕЛЕЙ
@@ -158,8 +143,8 @@ namespace StapelAppWPF.ViewModels
         #endregion ПЕРЕКЛЮЧЕНИЕ ОТОБРАЖЕНИЯ ГРАФИКОВ
 
         // Коллекция значений для отображения графика
-        private ISeries[] rpmShowCollection;
-        public ISeries[] RpmShowCollection { get => rpmShowCollection; set => Set(ref rpmShowCollection, value); }
+        //private ISeries[] rpmShowCollection;
+        //public ISeries[] RpmShowCollection { get => rpmShowCollection; set => Set(ref rpmShowCollection, value); }
 
         #endregion ВИЗУАЛЬНОЕ ОФОРМЛЕНИЕ
 
@@ -208,8 +193,22 @@ namespace StapelAppWPF.ViewModels
             var connections = NativeWifi.EnumerateInterfaceConnections();
             if (connections.Any())
             {
-                var first = connections.Last();
-                MessageBox.Show(first.ProfileName);
+                if (connectText == "Подключиться" || connectText == "ОШИБКА")
+                {
+                    ConnectColor = Brushes.Orange;
+                    ConnectText = "Отключиться";
+                }
+                else if (connectText == "Отключиться")
+                {
+                    ConnectColor = Brushes.Green;
+                    ConnectText = "Подключиться";
+                }
+                else
+                {
+                    ConnectColor = Brushes.Red;
+                    ConnectText = "ОШИБКА";
+                }
+                return;
             }
             else if (!connections.Any())
             {
@@ -219,6 +218,9 @@ namespace StapelAppWPF.ViewModels
             {
                 MessageBox.Show("Непредвиденная ошибка");
             }
+
+            ConnectColor = Brushes.Red;
+            ConnectText = "ОШИБКА";
         }
 
         private bool CanSwitchConnectionCmdExecute(object param)
@@ -235,9 +237,8 @@ namespace StapelAppWPF.ViewModels
             {
                 foreach (var connectionName in NativeWifi.EnumerateInterfaceConnections())
                 {
-                    if (connectionName.ProfileName == "Redmi Note 8 Pro")
+                    if (connectionName.ProfileName == "Torsiograph_V1.4")
                     {
-                        ConnectColor = Brushes.Green;
                         return true;
                     }
                 }
@@ -255,21 +256,21 @@ namespace StapelAppWPF.ViewModels
         public MainWindowViewModel()
         {
             #region DEBUG
-            ser = new();
+            //ser = new();
 
-            for (int i = 0; i < 50; i++)
-            {
-                ser.Add(rand.Next(-100, 100));
-            }
+            //for (int i = 0; i < 50; i++)
+            //{
+            //    ser.Add(rand.Next(-100, 100));
+            //}
 
-            rpmShowCollection = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Values = ser,
-                    Fill = null,
-                }
-            };
+            //rpmShowCollection = new ISeries[]
+            //{
+            //    new LineSeries<double>
+            //    {
+            //        Values = ser,
+            //        Fill = null,
+            //    }
+            //};
             #endregion DEBUG
 
             #region ИНИЦИАЛИЗАЦИЯ ПОЛЕЙ 
@@ -284,10 +285,10 @@ namespace StapelAppWPF.ViewModels
             connectColor = Brushes.Green;
             #endregion КНОПКА ПОДКЛЮЧЕНИЯ
             #region ВИЗАУЛЬНАЯ ЧАСТЬ ГРАФИКОВ
-            showOscilChart = Visibility.Hidden;
+            showRpmChart = Visibility.Hidden;
             showHarmChart = Visibility.Hidden;
 
-            heightOscilChart = 0;
+            heightRpmChart = 0;
             heightHarmChart = 0;
 
             XAxes = new Axis[]
@@ -314,12 +315,6 @@ namespace StapelAppWPF.ViewModels
 
             #endregion ИНИЦИАЛИЗАЦИЯ ПОЛЕЙ ВИЗУАЛЬНОГО ОФОРМЛЕНИЯ
 
-            // Инициализация списка отображаемых данных 
-            show = new();
-            // Инициализация длины отображаемых данных
-            lengthShow = 1024 * 4;
-            // Инициализация максимального количества данных на графике спектрального анализа
-            spectrumAnalisisCount = 1024 * 8;
             // Инициализация диаграммы спектрального анализа
             spectrum = new();
             #endregion ИНИЦИАЛИЗАЦИЯ ПОЛЕЙ
