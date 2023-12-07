@@ -153,13 +153,17 @@
                                        ZoomMode="X"
                                        Visibility="{Binding Path=ShowRpmChart}"
                                        Height="{Binding Path=HeightRpmChart}"
-                                       MinHeight="{Binding Path=HeightRpmChart}"/>
+                                       MinHeight="{Binding Path=HeightRpmChart}"
+                                       XAxes="{Binding Path=XAxes}"
+                                       YAxes="{Binding Path=YAxes}"/>
             <!-- ГРАФИК СПЕКТРАЛЬНОГО АНАЛИЗА -->
             <LiveChart2:CartesianChart Series="{Binding Path=RpmShowCollection}"
                                        ZoomMode="X"
                                        Visibility="{Binding Path=ShowHarmChart}"
                                        Height="{Binding Path=HeightHarmChart}"
-                                       MinHeight="{Binding Path=HeightHarmChart}">
+                                       MinHeight="{Binding Path=HeightHarmChart}"
+                                       XAxes="{Binding Path=XAxes}"
+                                       YAxes="{Binding Path=YAxes}">
 
             </LiveChart2:CartesianChart>
         </StackPanel>

@@ -24,7 +24,7 @@ using SkiaSharp;
 using StapelAppWPF.Infrastructure.Commands;
 using StapelAppWPF.Models;
 using StapelAppWPF.ViewModels.Base;
-
+using ScottPlot.Styles;
 
 namespace StapelAppWPF.ViewModels
 {
@@ -100,12 +100,12 @@ namespace StapelAppWPF.ViewModels
                 Set(ref checkRpmChart, value);
                 if (checkRpmChart)
                 {
-                    if (showRpmChart == Visibility.Hidden)
-                        HeightRpmChart = middleHeight;
+                    SetHeights();
                     ShowRpmChart = Visibility.Visible;
                 }
                 else if (!checkRpmChart)
                 {
+                    SetHeights();
                     ShowRpmChart = Visibility.Collapsed;
                 }
             }
@@ -118,12 +118,12 @@ namespace StapelAppWPF.ViewModels
                 Set(ref checkHarmChart, value);
                 if (checkHarmChart)
                 {
-                    if (showHarmChart == Visibility.Hidden)
-                        HeightHarmChart = middleHeight;
+                    SetHeights();
                     ShowHarmChart = Visibility.Visible;
                 }
                 else if (!checkHarmChart)
                 {
+                    SetHeights();
                     ShowHarmChart = Visibility.Collapsed;
                 }
             }
@@ -166,6 +166,35 @@ namespace StapelAppWPF.ViewModels
         private OpenFileDialog openDialog = new OpenFileDialog();
 
         #endregion
+
+        #region ФУНКЦИИ 
+
+        public void SetHeights()
+        {
+            if (checkRpmChart && !checkHarmChart)
+            {
+                HeightRpmOscilChart = largeHeight;
+                HeightRpmChart = middleHeight;
+            }
+            else if (checkHarmChart && !checkRpmChart)
+            {
+                HeightRpmOscilChart = largeHeight;
+                HeightHarmChart = middleHeight;
+            }
+            else if (checkRpmChart && checkHarmChart)
+            {
+                HeightRpmOscilChart = middleHeight;
+                HeightRpmChart = smallHeight - 50;
+                HeightHarmChart = smallHeight;
+            }
+            else
+            {
+                HeightRpmOscilChart = largeHeight;
+                HeightRpmChart = HeightHarmChart = 0;
+            }
+        }
+
+        #endregion ФУНКЦИИ
 
         #region КОМАНДЫ
 
@@ -244,7 +273,7 @@ namespace StapelAppWPF.ViewModels
                             ConnectText = "Подключиться";
                         if (connectText == "Подключиться")
                             ConnectColor = Brushes.Green;
-                            return true;
+                        return true;
                     }
                 }
             }
@@ -301,7 +330,11 @@ namespace StapelAppWPF.ViewModels
             {
                 new Axis
                 {
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray) { StrokeThickness = 2 }
+                    LabelsPaint = new SolidColorPaint(SKColors.Black),
+                    SeparatorsPaint = new SolidColorPaint(SKColors.DarkGray)
+                    {
+                        StrokeThickness = 2
+                    }
                 }
             };
 
@@ -309,8 +342,9 @@ namespace StapelAppWPF.ViewModels
                 {
                 new Axis
                 {
-                    TextSize = 10,
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray)
+                    TextSize = 14,
+                    LabelsPaint = new SolidColorPaint(SKColors.Black),
+                    SeparatorsPaint = new SolidColorPaint(SKColors.DarkGray)
                     {
                         StrokeThickness = 2,
                         PathEffect = new DashEffect(new float[] { 3, 3 })
