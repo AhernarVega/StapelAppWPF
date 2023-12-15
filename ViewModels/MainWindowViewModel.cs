@@ -76,9 +76,11 @@ namespace StapelAppWPF.ViewModels
         #endregion КНОПКА ПОДКЛЮЧЕНИЯ
 
         #region ПЕРЕКЛЮЧЕНИЕ ОТОБРАЖЕНИЯ ГРАФИКОВ
+        #region ЗНАЧЕНИЯ ВЫСОТ ГРАФИКОВ
         private readonly int smallHeight = 200;
         private readonly int middleHeight = 300;
         private readonly int largeHeight = 400;
+        #endregion ЗНАЧЕНИЯ ВЫСОТ ГРАФИКОВ
         #region VISIBILITY
         // Отображение различных графиков
         private Visibility showRpmChart;

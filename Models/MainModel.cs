@@ -258,11 +258,12 @@ namespace StapelAppWPF.Models
 
             showCollection = new();
 
-            SendInfoForController();
-            receiveThread = new(new ThreadStart(ProcessingPackage))
-            {
-                IsBackground = true
-            };
+            receiveThread = new(ProcessingPackage);
+            //SendInfoForController();
+            //receiveThread = new(new ThreadStart(ProcessingPackage))
+            //{
+            //    IsBackground = true
+            //};
         }
     }
 }
